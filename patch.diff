@@ -1,13 +1,28 @@
 diff --git a/android-build b/android-build
-index d729def2b..9215bdb74 100755
+index d729def2b..b0b380280 100755
 --- a/android-build
 +++ b/android-build
-@@ -13,7 +13,7 @@ from typing import Dict, Optional
+@@ -12,8 +12,8 @@ import sys
+ from typing import Dict, Optional
  
  
- SUPPORTED_NDK_VERSION = '28'
+-SUPPORTED_NDK_VERSION = '28'
 -API_LEVEL = '30'
++SUPPORTED_NDK_VERSION = '25'
 +API_LEVEL = '27'
  
  
  def get_host_string() -> str:
+diff --git a/mozjs-sys/mozjs/python/mozboot/mozboot/android.py b/mozjs-sys/mozjs/python/mozboot/mozboot/android.py
+index 29c48f5fd..b15028313 100644
+--- a/mozjs-sys/mozjs/python/mozboot/mozboot/android.py
++++ b/mozjs-sys/mozjs/python/mozboot/mozboot/android.py
+@@ -23,7 +23,7 @@ from mozboot.bootstrap import MOZCONFIG_SUGGESTION_TEMPLATE
+ # We need the NDK version in multiple different places, and it's inconvenient
+ # to pass down the NDK version to all relevant places, so we have this global
+ # variable.
+-NDK_VERSION = "r28b"
++NDK_VERSION = "r25c"
+ CMDLINE_TOOLS_VERSION_STRING = "19.0"
+ CMDLINE_TOOLS_VERSION = "13114758"
+ 
