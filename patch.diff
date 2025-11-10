@@ -11,26 +11,3 @@ index d729def2b..442008b3f 100755
  
  
  def get_host_string() -> str:
-diff --git a/mozjs-sys/src/jsapi.cpp b/mozjs-sys/src/jsapi.cpp
-index 2f85f7d56..6d8a23a95 100644
---- a/mozjs-sys/src/jsapi.cpp
-+++ b/mozjs-sys/src/jsapi.cpp
-@@ -49,6 +49,18 @@
- #include "js/shadow/Object.h"
- #include "js/shadow/Shape.h"
- #include "jsfriendapi.h"
-+#include <pthread.h>
-+
-+extern "C" {
-+__attribute__((weak))
-+int pthread_cond_clockwait(pthread_cond_t* cond,
-+                          pthread_mutex_t* mutex,
-+                          clockid_t clock_id,
-+                          const struct timespec* abstime) {
-+    // Fallback to the older API available since API 21
-+    return pthread_cond_timedwait(cond, mutex, abstime);
-+}
-+}
- 
- namespace glue {
- 
