@@ -8,7 +8,7 @@ index d729def2b..b0b380280 100755
  
 -SUPPORTED_NDK_VERSION = '28'
 -API_LEVEL = '30'
-+SUPPORTED_NDK_VERSION = '25'
++SUPPORTED_NDK_VERSION = '26'
 +API_LEVEL = '27'
  
  
@@ -22,7 +22,7 @@ index 29c48f5fd..b15028313 100644
  # to pass down the NDK version to all relevant places, so we have this global
  # variable.
 -NDK_VERSION = "r28b"
-+NDK_VERSION = "r25c"
++NDK_VERSION = "r26b"
  CMDLINE_TOOLS_VERSION_STRING = "19.0"
  CMDLINE_TOOLS_VERSION = "13114758"
  
