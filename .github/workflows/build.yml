@@ -1,0 +1,63 @@
+name: Rust
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        required: false
+        type: string
+      rust_version:
+        required: false
+        default: "1.85.0"
+        type: string
+
+env:
+  RUST_BACKTRACE: 1
+  SHELL: /bin/bash
+  CARGO_INCREMENTAL: 0
+  MOZJS_CREATE_ARCHIVE: 1
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ["aarch64-linux-android", "x86_64-linux-android"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Clone mozjs repository
+        run: |
+          git clone --depth 1 --branch ${{ inputs.tag }} https://github.com/servo/mozjs/ mozjs
+      - name: Apply patch
+        run: git apply ../patch.diff
+        working-directory: mozjs
+      - name: Install NDK
+        uses: nttld/setup-ndk@v1
+        id: setup-ndk
+        with:
+          ndk-version: r28b
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@master
+        id: toolchain
+        with:
+          toolchain: ${{ inputs.rust_version }}
+          targets: ${{ matrix.target }}
+          components: "rustfmt"
+      - name: Build
+        env:
+          ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
+        run: |
+          ./android-build cargo +${{ steps.toolchain.outputs.name }} build --target="${{ matrix.target }}"
+        working-directory: mozjs
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v1
+        if: ${{ inputs.release }}
+        with:
+          subject-path: "./mozjs/target/libmozjs-${{ matrix.target }}.tar.gz"
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        if: ${{ env.NEW_RUST_CHECK == 'false' }}
+        with:
+          path: ./mozjs/target/libmozjs-${{ matrix.target }}.tar.gz
+          name: libmozjs-${{ matrix.target }}.tar.gz

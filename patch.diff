@@ -1,0 +1,13 @@
+diff --git a/android-build b/android-build
+index d729def2b..9215bdb74 100755
+--- a/android-build
++++ b/android-build
+@@ -13,7 +13,7 @@ from typing import Dict, Optional
+ 
+ 
+ SUPPORTED_NDK_VERSION = '28'
+-API_LEVEL = '30'
++API_LEVEL = '27'
+ 
+ 
+ def get_host_string() -> str:
