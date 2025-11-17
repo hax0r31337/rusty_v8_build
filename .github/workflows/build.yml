@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         target: ["aarch64-linux-android"]
-        variant: release
+        variant: ["release"]
 
     env:
       V8_FROM_SOURCE: 1
