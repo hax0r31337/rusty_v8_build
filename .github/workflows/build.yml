@@ -86,12 +86,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.LIB_NAME }}_${{ matrix.config.variant }}_${{ matrix.config.target }}.${{ env.LIB_EXT }}.gz
-          path: target/${{ env.LIB_NAME }}_${{ matrix.config.variant }}_${{ matrix.config.target }}.${{ env.LIB_EXT }}.gz
-        working-directory: rusty_v8
+          path: rusty_v8/target/${{ env.LIB_NAME }}_${{ matrix.config.variant }}_${{ matrix.config.target }}.${{ env.LIB_EXT }}.gz
 
       - name: Upload CI artifacts
         uses: actions/upload-artifact@v4
         with:
           name: src_binding_${{ matrix.config.variant }}_${{ matrix.config.target }}.rs
-          path: target/src_binding_${{ matrix.config.variant }}_${{ matrix.config.target }}.rs
-        working-directory: rusty_v8
+          path: rusty_v8/target/src_binding_${{ matrix.config.variant }}_${{ matrix.config.target }}.rs
