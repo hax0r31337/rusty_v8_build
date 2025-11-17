@@ -9,12 +9,6 @@ on:
         required: false
         default: "1.91.1"
         type: string
-env:
-  V8_FROM_SOURCE: 1
-  ANDROID_NDK_HOME: ${{ github.workspace }}/rusty_v8/third_party/android_ndk
-  CARGO_VARIANT_FLAG: ${{ matrix.config.variant == 'release' && '--release' || '' }}
-  LIB_NAME: ${{ contains(matrix.config.target, 'windows') && 'rusty_v8' || 'librusty_v8' }}
-  LIB_EXT: ${{ contains(matrix.config.target, 'windows') && 'lib' || 'a' }}
 jobs:
   android:
     runs-on: ubuntu-latest
@@ -23,6 +17,13 @@ jobs:
       matrix:
         target: ["aarch64-linux-android"]
         variant: release
+
+    env:
+      V8_FROM_SOURCE: 1
+      ANDROID_NDK_HOME: ${{ github.workspace }}/rusty_v8/third_party/android_ndk
+      CARGO_VARIANT_FLAG: ${{ matrix.config.variant == 'release' && '--release' || '' }}
+      LIB_NAME: ${{ contains(matrix.config.target, 'windows') && 'rusty_v8' || 'librusty_v8' }}
+      LIB_EXT: ${{ contains(matrix.config.target, 'windows') && 'lib' || 'a' }}
     steps:
       - uses: actions/checkout@v4
       - name: Clone rusty_v8 repository
