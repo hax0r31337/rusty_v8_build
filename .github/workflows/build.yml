@@ -1,5 +1,4 @@
 name: Rust
-
 on:
   workflow_dispatch:
     inputs:
@@ -8,35 +7,49 @@ on:
         type: string
       rust_version:
         required: false
-        default: "1.85.0"
+        default: "1.91.1"
         type: string
-
 env:
-  RUST_BACKTRACE: 1
-  SHELL: /bin/bash
-  CARGO_INCREMENTAL: 0
-  MOZJS_CREATE_ARCHIVE: 1
-
+  V8_FROM_SOURCE: 1
+  ANDROID_NDK_HOME: ${{ github.workspace }}/rusty_v8/third_party/android_ndk
 jobs:
   android:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        target: ["aarch64-linux-android", "x86_64-linux-android"]
+        target: ["aarch64-linux-android"]
     steps:
       - uses: actions/checkout@v4
-      - name: Clone mozjs repository
+      - name: Clone rusty_v8 repository
         run: |
-          git clone --depth 1 --branch ${{ inputs.tag }} https://github.com/servo/mozjs/ mozjs
-      - name: Apply patch
-        run: git apply ../patch.diff
-        working-directory: mozjs
-      - name: Install NDK
-        uses: nttld/setup-ndk@v1
-        id: setup-ndk
-        with:
-          ndk-version: r28b
+          git clone --depth 1 --branch ${{ inputs.tag }} https://github.com/denoland/rusty_v8.git rusty_v8
+      # - name: Apply patch
+      #   run: git apply ../patch.diff
+      #   working-directory: rusty_v8
+      - name: Install GN and Ninja
+        run: |
+          # Install Ninja
+          sudo apt-get update
+          sudo apt-get install -y ninja-build
+          
+          # Install GN
+          git clone https://gn.googlesource.com/gn
+          cd gn
+          python3 build/gen.py
+          ninja -C out
+          sudo cp out/gn /usr/local/bin/
+          cd ..
+          
+          # Verify installations
+          ninja --version
+          gn --version
+      - name: Setup sccache
+        uses: mozilla-actions/sccache-action@v0.0.6
+      - name: Configure sccache
+        run: |
+          echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
+          echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
       - name: Install Rust
         uses: dtolnay/rust-toolchain@master
         id: toolchain
@@ -44,20 +57,11 @@ jobs:
           toolchain: ${{ inputs.rust_version }}
           targets: ${{ matrix.target }}
           components: "rustfmt"
-      - name: Build
-        env:
-          ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
+      - name: Configure Android NDK environment
         run: |
-          ./android-build cargo +${{ steps.toolchain.outputs.name }} build --target="${{ matrix.target }}"
-        working-directory: mozjs
-      - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v1
-        if: ${{ inputs.release }}
-        with:
-          subject-path: "./mozjs/target/libmozjs-${{ matrix.target }}.tar.gz"
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        if: ${{ env.NEW_RUST_CHECK == 'false' }}
-        with:
-          path: ./mozjs/target/libmozjs-${{ matrix.target }}.tar.gz
-          name: libmozjs-${{ matrix.target }}.tar.gz
+          echo "GN_ARGS=android_ndk_root=\"$ANDROID_NDK_HOME\"" >> $GITHUB_ENV
+          echo "BINDGEN_EXTRA_CLANG_ARGS_aarch64_linux_android=--target=aarch64-linux-android --sysroot=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot" >> $GITHUB_ENV
+      - name: Build
+        run: |
+          cargo build -vv --target="${{ matrix.target }}" --release
+        working-directory: rusty_v8
