@@ -44,12 +44,12 @@ jobs:
           # Verify installations
           ninja --version
           gn --version
-      - name: Setup sccache
-        uses: mozilla-actions/sccache-action@v0.0.6
-      - name: Configure sccache
-        run: |
-          echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
-          echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
+      # - name: Setup sccache
+      #   uses: mozilla-actions/sccache-action@v0.0.6
+      # - name: Configure sccache
+      #   run: |
+      #     echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
+      #     echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
       - name: Install Rust
         uses: dtolnay/rust-toolchain@master
         id: toolchain
