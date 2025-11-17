@@ -12,6 +12,9 @@ on:
 env:
   V8_FROM_SOURCE: 1
   ANDROID_NDK_HOME: ${{ github.workspace }}/rusty_v8/third_party/android_ndk
+  CARGO_VARIANT_FLAG: ${{ matrix.config.variant == 'release' && '--release' || '' }}
+  LIB_NAME: ${{ contains(matrix.config.target, 'windows') && 'rusty_v8' || 'librusty_v8' }}
+  LIB_EXT: ${{ contains(matrix.config.target, 'windows') && 'lib' || 'a' }}
 jobs:
   android:
     runs-on: ubuntu-latest
@@ -19,6 +22,7 @@ jobs:
       fail-fast: false
       matrix:
         target: ["aarch64-linux-android"]
+        variant: release
     steps:
       - uses: actions/checkout@v4
       - name: Clone rusty_v8 repository
@@ -61,7 +65,32 @@ jobs:
         run: |
           echo "GN_ARGS=android_ndk_root=\"$ANDROID_NDK_HOME\"" >> $GITHUB_ENV
           echo "BINDGEN_EXTRA_CLANG_ARGS_aarch64_linux_android=--target=aarch64-linux-android --sysroot=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot" >> $GITHUB_ENV
+          echo "BINDGEN_EXTRA_CLANG_ARGS=--target=aarch64-linux-android --sysroot=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot" >> $GITHUB_ENV
       - name: Build
         run: |
-          cargo build -vv --target="${{ matrix.target }}" --release
+          cargo build -vv --target="${{ matrix.target }}" ${{ env.CARGO_VARIANT_FLAG }}
+        working-directory: rusty_v8
+
+      - name: Prepare binary publish
+        if: matrix.config.variant == 'debug' || matrix.config.variant == 'release'
+        run: |
+          gzip -9c target/${{ matrix.config.target }}/${{ matrix.config.variant }}/gn_out/obj/${{ env.LIB_NAME }}.${{ env.LIB_EXT }} > target/${{ env.LIB_NAME }}_${{ matrix.config.variant }}_${{ matrix.config.target }}.${{ env.LIB_EXT }}.gz
+          ls -l target/${{ env.LIB_NAME }}_${{ matrix.config.variant }}_${{ matrix.config.target }}.${{ env.LIB_EXT }}.gz
+
+          cp target/${{ matrix.config.target }}/${{ matrix.config.variant}}/gn_out/src_binding.rs target/src_binding_${{ matrix.config.variant }}_${{ matrix.config.target }}.rs
+          ls -l target/src_binding_${{ matrix.config.variant }}_${{ matrix.config.target }}.rs
+        working-directory: rusty_v8
+
+      - name: Upload CI artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.LIB_NAME }}_${{ matrix.config.variant }}_${{ matrix.config.target }}.${{ env.LIB_EXT }}.gz
+          path: target/${{ env.LIB_NAME }}_${{ matrix.config.variant }}_${{ matrix.config.target }}.${{ env.LIB_EXT }}.gz
+        working-directory: rusty_v8
+
+      - name: Upload CI artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: src_binding_${{ matrix.config.variant }}_${{ matrix.config.target }}.rs
+          path: target/src_binding_${{ matrix.config.variant }}_${{ matrix.config.target }}.rs
         working-directory: rusty_v8
