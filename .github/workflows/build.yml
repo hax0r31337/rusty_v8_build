@@ -28,7 +28,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Clone rusty_v8 repository
         run: |
-          git clone --depth 1 --branch ${{ inputs.tag }} https://github.com/denoland/rusty_v8.git rusty_v8
+          git clone --depth 1 --branch ${{ inputs.tag }} --recurse-submodules https://github.com/denoland/rusty_v8.git rusty_v8
       # - name: Apply patch
       #   run: git apply ../patch.diff
       #   working-directory: rusty_v8
