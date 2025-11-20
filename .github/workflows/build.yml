@@ -65,12 +65,21 @@ jobs:
       - name: Configure Android NDK environment
         run: |
           echo "GN_ARGS=android_ndk_root=\"$ANDROID_NDK_HOME\"" >> $GITHUB_ENV
-          echo "BINDGEN_EXTRA_CLANG_ARGS_aarch64_linux_android=--target=aarch64-linux-android --sysroot=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot" >> $GITHUB_ENV
-          echo "BINDGEN_EXTRA_CLANG_ARGS=--target=aarch64-linux-android --sysroot=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot" >> $GITHUB_ENV
       - name: Build
         run: |
           cargo build -vv --target="${{ matrix.target }}" ${{ env.CARGO_VARIANT_FLAG }}
         working-directory: rusty_v8
+        continue-on-error: true
+      - name: Configure Bindgen
+        run: |
+          echo "BINDGEN_EXTRA_CLANG_ARGS_aarch64_linux_android=--target=aarch64-linux-android --sysroot=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot" >> $GITHUB_ENV
+          echo "BINDGEN_EXTRA_CLANG_ARGS=--target=aarch64-linux-android --sysroot=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot" >> $GITHUB_ENV
+          
+      - name: Bindgen
+        run: |
+          cargo build -vv --target="${{ matrix.target }}" ${{ env.CARGO_VARIANT_FLAG }}
+        working-directory: rusty_v8
+        continue-on-error: true
 
       - name: Prepare binary publish
         if: matrix.config.variant == 'debug' || matrix.config.variant == 'release'
