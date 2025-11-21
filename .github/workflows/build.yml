@@ -67,7 +67,6 @@ jobs:
           echo "GN_ARGS=android_ndk_root=\"$ANDROID_NDK_HOME\"" >> $GITHUB_ENV
 
       - name: Install Clang
-        if: startsWith(matrix.config.os, 'ubuntu')
         run: |
           echo "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-19 main" | sudo dd of=/etc/apt/sources.list.d/llvm-toolchain-jammy-19.list
           curl https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor | sudo dd of=/etc/apt/trusted.gpg.d/llvm-snapshot.gpg
