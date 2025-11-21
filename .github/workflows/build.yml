@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         target: ["aarch64-linux-android"]
-        variant: ["release", "debug"]
+        variant: ["release"]
 
     env:
       V8_FROM_SOURCE: 1
@@ -65,6 +65,17 @@ jobs:
       - name: Configure Android NDK environment
         run: |
           echo "GN_ARGS=android_ndk_root=\"$ANDROID_NDK_HOME\"" >> $GITHUB_ENV
+
+      - name: Install Clang
+        if: startsWith(matrix.config.os, 'ubuntu')
+        run: |
+          echo "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-19 main" | sudo dd of=/etc/apt/sources.list.d/llvm-toolchain-jammy-19.list
+          curl https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor | sudo dd of=/etc/apt/trusted.gpg.d/llvm-snapshot.gpg
+          sudo apt-get update
+          sudo apt-get -qq remove 'clang-*'
+          sudo apt-get install lld-19 clang-19 clang-tools-19 clang-tidy-19 clang-format-19 libclang-19-dev -y
+          echo "LIBCLANG_PATH=/usr/lib/llvm-19/lib" >> $GITHUB_ENV
+          
       - name: Build
         run: |
           cargo build -vv --target="${{ matrix.target }}" ${{ env.CARGO_VARIANT_FLAG }}
@@ -79,7 +90,6 @@ jobs:
         run: |
           cargo build -vv --target="${{ matrix.target }}" ${{ env.CARGO_VARIANT_FLAG }}
         working-directory: rusty_v8
-        continue-on-error: true
 
       - name: Prepare binary publish
         if: matrix.variant == 'debug' || matrix.variant == 'release'
