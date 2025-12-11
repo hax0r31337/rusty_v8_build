@@ -7,7 +7,7 @@ on:
         type: string
       rust_version:
         required: false
-        default: "1.91.1"
+        default: "1.92.0"
         type: string
 jobs:
   android:
@@ -24,6 +24,7 @@ jobs:
       CARGO_VARIANT_FLAG: ${{ matrix.variant == 'release' && '--release' || '' }}
       LIB_NAME: ${{ contains(matrix.target, 'windows') && 'rusty_v8' || 'librusty_v8' }}
       LIB_EXT: ${{ contains(matrix.target, 'windows') && 'lib' || 'a' }}
+      CARGO_FEATURE_V8_ENABLE_SANDBOX: true
     steps:
       - uses: actions/checkout@v4
       - name: Clone rusty_v8 repository
