@@ -1,13 +1,12 @@
-diff --git a/android-build b/android-build
-index d729def2b..442008b3f 100755
---- a/android-build
-+++ b/android-build
-@@ -13,7 +13,7 @@ from typing import Dict, Optional
+diff --git a/.gn b/.gn
+index 858a605..6969dd4 100644
+--- a/.gn
++++ b/.gn
+@@ -17,6 +17,7 @@ check_targets = []
+ secondary_source = "//v8/"
  
- 
- SUPPORTED_NDK_VERSION = '28'
--API_LEVEL = '30'
-+API_LEVEL = '28'
- 
- 
- def get_host_string() -> str:
+ default_args = {
++  v8_enable_i18n_support = false
+   clang_use_chrome_plugins = false
+   is_component_build = false
+   linux_use_bundled_binutils = false
