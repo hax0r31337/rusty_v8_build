@@ -31,7 +31,7 @@ jobs:
         run: |
           git clone --depth 1 --branch ${{ inputs.tag }} --recurse-submodules https://github.com/denoland/rusty_v8.git rusty_v8
       - name: Apply patch
-        run: git apply ../patch.diff
+        run: git apply --allow-empty ../patch.diff
         working-directory: rusty_v8
       - name: Install GN and Ninja
         run: |
