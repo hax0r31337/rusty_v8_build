@@ -33,6 +33,10 @@ jobs:
       - name: Apply patch
         run: git apply --allow-empty ../patch.diff
         working-directory: rusty_v8
+      - name: Install python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
       - name: Install GN and Ninja
         run: |
           # Install Ninja
