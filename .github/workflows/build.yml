@@ -7,7 +7,7 @@ on:
         type: string
       rust_version:
         required: false
-        default: "1.92.0"
+        default: "1.93.1"
         type: string
 jobs:
   android:
